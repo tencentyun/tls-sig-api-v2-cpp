@@ -57,7 +57,7 @@ src/tls_sig_api_v2.h
 
 库文件路径，分 Win32 和 x64，而且 Debug 和 Release 也通过目录予以区分
 ```
-tls-sig-api_xx/xxxx/tlsignature.lib
+tls-sig-api_xx/xxxx/tlssigapi_v2.lib
 tls-sig-api_xx/xxxx/zlibstatic.lib
 tls-sig-api_xx/xxxx/mbedcrypto.lib
 ```

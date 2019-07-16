@@ -14,6 +14,7 @@
 #include "openssl/hmac.h"
 #include "openssl/sha.h"
 #else
+#include "mbedtls/pk.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/base64.h"

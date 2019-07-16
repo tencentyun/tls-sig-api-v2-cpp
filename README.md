@@ -77,12 +77,12 @@ tls-sig-api_xx/xxxx/mbedcrypto.lib
 std::string key = "5bd2850fff3ecb11d7c805251c51ee463a25727bddc2385f3fa8bfee1bb93b5e";
 
 std::string sig;
-std::sgring errMsg;
-int ret = gen_sig(140000000, "xiaojun", key, 180*86400, sig, errMsg);
+std::sgring errmsg;
+int ret = gen_sig(140000000, "xiaojun", key, 180*86400, sig, errmsg);
 if (0 != ret) {
-	std::cout << "gen_sig_v2 failed " << ret << " " << errMsg << std::endl;
+	std::cout << "gen_sig failed " << ret << " " << errmsg << std::endl;
 } else {
-	std::cout << "gen_sig_v2 " << sig << std::endl;
+	std::cout << "gen_sig " << sig << std::endl;
 }
 
 ```

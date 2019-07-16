@@ -37,7 +37,7 @@ add_definitions(-DFMT_HEADER_ONLY -DRAPIDJSON_HAS_STDSTRING=1)
 if(UNIX)
     include_directories(
         third/rapidjson/include
-        third/fmt
+        third/fmt/include
         ${ZLIB_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIR}
         src
@@ -66,7 +66,7 @@ endif()
 if(MSVC)
     include_directories(
         third/rapidjson/include
-        third/fmt
+        third/fmt/include
         third/mbedtls/include
         # Windows 上 zlib include 路径需要手动指定
         third/zlib-1.2.11

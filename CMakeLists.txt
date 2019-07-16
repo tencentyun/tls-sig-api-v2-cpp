@@ -82,11 +82,11 @@ if(MSVC)
     
     if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
         set(ZLIB_NAME "third/zlib-1.2.11/Debug/zlibstaticd")
-        set(MBEDTLS_NAME "third/mbedtls/library/Debug/mbedcrypto")
+        set(MBEDTLS_NAME "third/mbedtls/crypto/library/Debug/mbedcrypto")
     endif()
     if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         set(ZLIB_NAME "third/zlib-1.2.11/Release/zlibstatic")
-        set(MBEDTLS_NAME "third/mbedtls/library/Release/mbedcrypto")
+        set(MBEDTLS_NAME "third/mbedtls/crypto/library/Release/mbedcrypto")
     endif()
 
     target_link_libraries(tlssigapi_v2

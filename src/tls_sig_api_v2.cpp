@@ -11,9 +11,6 @@
 #include <sstream>
 
 #ifdef USE_OPENSSL
-#include "openssl/evp.h"
-#include "openssl/err.h"
-#include "openssl/pem.h"
 #include "openssl/hmac.h"
 #include "openssl/sha.h"
 #else
@@ -42,12 +39,12 @@
 #endif
 
 static std::string hmacsha256(uint32_t sdkappid, const std::string& identifier,
-        uint64_t initTime, uint64_t expire, const std::string& key);
+        uint64_t init_time, uint64_t expire, const std::string& key);
 static std::string hmacsha256(uint32_t sdkappid,
-        const std::string& identifier, uint64_t initTime, uint64_t expire,
-        const std::string& key, const std::string& userBuf);
+        const std::string& identifier, uint64_t init_time, uint64_t expire,
+        const std::string& key, const std::string& userbuf);
 
-//去掉某些base64中生成的\r\n space
+//去掉某些 base64 中生成的 \r\n space
 static std::string base64_strip(const void* data, size_t data_len)
 {
     const char* d = static_cast<const char*>(data);
@@ -69,6 +66,7 @@ static int base64_encode(const void* data, size_t data_len, std::string &base64_
             reinterpret_cast<const uint8_t*>(data), data_len);
     return 0;
 }
+
 static int base64_decode(const char* data, size_t data_len, std::string &raw){
     raw.resize(data_len);
     std::string base64 = base64_strip(data, data_len);
@@ -95,6 +93,7 @@ static int base64_encode(const void* data, size_t data_len, std::string &base64_
     base64_buffer.resize(outlen);
     return ret;
 }
+
 static int base64_decode(const char* data, size_t data_len, std::string &raw){
     size_t outlen = 0;
     std::string base64 = base64_strip(data, data_len);
@@ -114,7 +113,7 @@ static int base64_decode(const char* data, size_t data_len, std::string &raw){
 static int base64_encode_url(const void *data, size_t data_len, std::string &base64) {
     int ret = base64_encode(data, data_len, base64);
     if(ret != 0)return ret;
-    for(size_t i=0;i<base64.size();++i){
+    for (size_t i = 0; i<base64.size(); ++i) {
         switch(base64[i]){
         case '+':
             base64[i] = '*';
@@ -132,27 +131,28 @@ static int base64_encode_url(const void *data, size_t data_len, std::string &bas
     return 0;
 }
 
-static int compress(const void *data, size_t data_len, std::string &compressed) {
+static int compress(const void *data, size_t data_len, std::string &compressed)
+{
     compressed.resize(std::max(data_len, static_cast<size_t>(128)));
-    uLongf uLen = compressed.size();
+    uLongf len = compressed.size();
     int ret = compress2(
-        reinterpret_cast<Bytef*>(const_cast<char*>(compressed.data())), &uLen,
+        reinterpret_cast<Bytef*>(const_cast<char*>(compressed.data())), &len,
         reinterpret_cast<const Bytef*>(data), data_len, Z_BEST_SPEED);
     if(ret == Z_OK) {
-        compressed.resize(uLen);
+        compressed.resize(len);
         return ret;
     }
     if(ret != Z_MEM_ERROR)return ret;
     compressed.resize(compressed.size() * 2);
-    uLen = compressed.size();
+    len = compressed.size();
     ret = compress2(
-        reinterpret_cast<Bytef*>(const_cast<char*>(compressed.data())), &uLen,
+        reinterpret_cast<Bytef*>(const_cast<char*>(compressed.data())), &len,
         reinterpret_cast<const Bytef*>(data), data_len, Z_BEST_SPEED);
-    if(ret == Z_OK) compressed.resize(uLen);
+    if(ret == Z_OK) compressed.resize(len);
     return ret;
 }
 
-static int JsonToSig(const rapidjson::Document &json, std::string &sig, std::string &errmsg)
+static int json2sig(const rapidjson::Document &json, std::string &sig, std::string &errmsg)
 {
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> w(s);
@@ -160,13 +160,12 @@ static int JsonToSig(const rapidjson::Document &json, std::string &sig, std::str
 
     std::string compressed;
     int ret = compress(s.GetString(), s.GetSize(), compressed);
-    if (ret != Z_OK)
-    {
+    if (ret != Z_OK) {
         errmsg = fmt::sprintf("compress failed %d", ret);
         return CHECK_ERR16;
     }
-    ret =base64_encode_url(compressed.data(), compressed.size(), sig);
-    if(ret != 0){
+    ret = base64_encode_url(compressed.data(), compressed.size(), sig);
+    if (ret != 0) {
         errmsg = fmt::sprintf("base64_encode_url failed %#x", ret);
         return CHECK_ERR16;
     }
@@ -176,72 +175,72 @@ static int JsonToSig(const rapidjson::Document &json, std::string &sig, std::str
 // 生成签名
 TLS_API int gen_sig(uint32_t sdkappid, const std::string& identifier,
         const std::string& key, int expire,
-        std::string& sig, std::string& errMsg)
+        std::string& sig, std::string& errmsg)
 {
-    uint64_t currTime = time(NULL);
-    std::string base64RawSig = hmacsha256(sdkappid, identifier, currTime, expire, key);
-    rapidjson::Document sigDoc;
-    sigDoc.SetObject();
-    sigDoc.AddMember("TLS.ver", "2.0", sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.sdkappid", sdkappid, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.identifier", identifier, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.time", currTime, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.expire", expire, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.sig", base64RawSig, sigDoc.GetAllocator());
-    return JsonToSig(sigDoc, sig, errMsg);
+    uint64_t curr_time = time(NULL);
+    std::string base64_raw_sig = hmacsha256(sdkappid, identifier, curr_time, expire, key);
+    rapidjson::Document sig_doc;
+    sig_doc.SetObject();
+    sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.identifier", identifier, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.time", curr_time, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sig", base64_raw_sig, sig_doc.GetAllocator());
+    return json2sig(sig_doc, sig, errmsg);
 }
 
 // 生成带 userbuf 的签名
 TLS_API int gen_sig_with_userbuf(
         uint32_t sdkappid,
         const std::string& identifier,
-		const std::string& key,
+        const std::string& key,
         int expire,
-        const std::string& userBuf,
+        const std::string& userbuf,
         std::string& sig,
-        std::string& errMsg)
+        std::string& errmsg)
 {
     uint64_t currTime = time(NULL);
     std::string base64UserBuf;
-    base64_encode(userBuf.data(), userBuf.length(), base64UserBuf);
+    base64_encode(userbuf.data(), userbuf.length(), base64UserBuf);
     std::string base64RawSig = hmacsha256(
             sdkappid, identifier, currTime, expire, key, base64UserBuf);
-    rapidjson::Document sigDoc;
-    sigDoc.SetObject();
-    sigDoc.AddMember("TLS.ver", "2.0", sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.sdkappid", sdkappid, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.identifier", identifier, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.time", currTime, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.expire", expire, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.userbuf", base64UserBuf, sigDoc.GetAllocator());
-    sigDoc.AddMember("TLS.sig", base64RawSig, sigDoc.GetAllocator());
-    return JsonToSig(sigDoc, sig, errMsg);
+    rapidjson::Document sig_doc;
+    sig_doc.SetObject();
+    sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.identifier", identifier, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.time", currTime, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.userbuf", base64UserBuf, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sig", base64RawSig, sig_doc.GetAllocator());
+    return json2sig(sig_doc, sig, errmsg);
 }
 
 
 static std::string __hmacsha256(uint32_t sdkappid,
-        const std::string& identifier, uint64_t initTime,
+        const std::string& identifier, uint64_t init_time,
         uint64_t expire, const std::string& key,
-        const std::string& base64UserBuf, bool userBufEnabled)
+        const std::string& base64_userbuf, bool userbuf_enabled)
 {
-    std::string rawContentToBeSigned = "TLS.identifier:" + identifier + "\n"
+    std::string raw_content_to_be_signed = "TLS.identifier:" + identifier + "\n"
         + "TLS.sdkappid:" + std::to_string(static_cast<long long>(sdkappid)) + "\n"
-        + "TLS.time:" + std::to_string(static_cast<long long>(initTime)) + "\n"
+        + "TLS.time:" + std::to_string(static_cast<long long>(init_time)) + "\n"
         + "TLS.expire:" + std::to_string(static_cast<long long>(expire)) + "\n";
-    if (true == userBufEnabled) {
-        rawContentToBeSigned += "TLS.userbuf:" + base64UserBuf + "\n";
+    if (true == userbuf_enabled) {
+        raw_content_to_be_signed += "TLS.userbuf:" + base64_userbuf + "\n";
     }
-    std::string base64Result;
+    std::string base64_result;
 
 #ifdef USE_OPENSSL
     unsigned char result[SHA256_DIGEST_LENGTH];
-    unsigned resultLen = sizeof(result);
+    unsigned result_len = sizeof(result);
     HMAC(EVP_sha256(), key.data(), key.length(),
-            reinterpret_cast<const unsigned char *>(rawContentToBeSigned.data()),
-            rawContentToBeSigned.length(), result, &resultLen);
+            reinterpret_cast<const unsigned char *>(raw_content_to_be_signed.data()),
+            raw_content_to_be_signed.length(), result, &result_len);
 #else
     unsigned char result[32] = { 0 };
-    unsigned resultLen = sizeof(result);
+    unsigned result_len = sizeof(result);
     mbedtls_md_context_t ctx;
     mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
 
@@ -250,33 +249,33 @@ static std::string __hmacsha256(uint32_t sdkappid,
     mbedtls_md_hmac_starts(&ctx,
             reinterpret_cast<const unsigned char *>(key.data()), key.length());
     mbedtls_md_hmac_update(&ctx,
-            reinterpret_cast<const unsigned char *>(rawContentToBeSigned.data()),
-            rawContentToBeSigned.length());
+            reinterpret_cast<const unsigned char *>(raw_content_to_be_signed.data()),
+            raw_content_to_be_signed.length());
     mbedtls_md_hmac_finish(&ctx, result);
     mbedtls_md_free(&ctx);
 #endif
-    base64_encode(result, resultLen, base64Result);
-    return base64Result;
+    base64_encode(result, result_len, base64_result);
+    return base64_result;
 }
 
 
 // 使用 hmac sha256 生成 sig
 static std::string hmacsha256(uint32_t sdkappid,
-        const std::string& identifier, uint64_t initTime,
+        const std::string& identifier, uint64_t init_time,
         uint64_t expire, const std::string& key)
 {
     return __hmacsha256(sdkappid, identifier,
-            initTime, expire, key, "", false);
+            init_time, expire, key, "", false);
 }
 
 
 // 使用 hmac sha256 生成带 userbuf 的 sig
 static std::string hmacsha256(uint32_t sdkappid,
-        const std::string& identifier, uint64_t initTime,
+        const std::string& identifier, uint64_t init_time,
         uint64_t expire, const std::string& key,
-        const std::string& base64UserBuf)
+        const std::string& base64_userbuf)
 {
     return __hmacsha256(sdkappid, identifier,
-            initTime, expire, key, base64UserBuf, true);
+            init_time, expire, key, base64_userbuf, true);
 }
 

@@ -39,7 +39,7 @@ add_definitions(-DFMT_HEADER_ONLY -DRAPIDJSON_HAS_STDSTRING=1)
 if(UNIX)
     include_directories(
         third/rapidjson/include
-        third/fmt
+        third/fmt/include
         ${ZLIB_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIR}
         src
@@ -68,7 +68,7 @@ endif()
 if(MSVC)
     include_directories(
         third/rapidjson/include
-        third/fmt
+        third/fmt/include
         third/mbedtls/include
         # Windows 上 zlib include 路径需要手动指定
         third/zlib-1.2.11
@@ -84,11 +84,11 @@ if(MSVC)
     
     if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
         set(ZLIB_NAME "third/zlib-1.2.11/Debug/zlibstaticd")
-        set(MBEDTLS_NAME "third/mbedtls/library/Debug/mbedcrypto")
+        set(MBEDTLS_NAME "third/mbedtls/crypto/library/Debug/mbedcrypto")
     endif()
     if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         set(ZLIB_NAME "third/zlib-1.2.11/Release/zlibstatic")
-        set(MBEDTLS_NAME "third/mbedtls/library/Release/mbedcrypto")
+        set(MBEDTLS_NAME "third/mbedtls/crypto/library/Release/mbedcrypto")
     endif()
 
     target_link_libraries(tlssigapi_v2

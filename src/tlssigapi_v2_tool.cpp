@@ -106,11 +106,9 @@ int main(int argc, char * argv[])
 
     const char * cmd = argv[1];
     std::string sig_file;
-    int sdkappid;
     std::string sdkappid_str;
     std::string identifier;
     std::string userbuf;
-    int expire;
 
     int ret = 0;
     if (0 == strcmp(cmd, "gen") && 6 == argc) {

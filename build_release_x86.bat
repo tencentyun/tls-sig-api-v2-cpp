@@ -21,4 +21,4 @@ set PREBUILD_DIR=tls-sig-api_%ARCH%
 mkdir %PREBUILD_DIR%\%BUILD_TYPE%
 xcopy %BUILD_TYPE%\* %PREBUILD_DIR%\%BUILD_TYPE% /E /Y
 xcopy third\%ZLIB%\%BUILD_TYPE%\* %PREBUILD_DIR%\%BUILD_TYPE% /E /Y
-xcopy third\%MBEDTLS%\library\%BUILD_TYPE%\* %PREBUILD_DIR%\%BUILD_TYPE% /E /Y
+xcopy third\%MBEDTLS%\crypto\library\%BUILD_TYPE%\* %PREBUILD_DIR%\%BUILD_TYPE% /E /Y

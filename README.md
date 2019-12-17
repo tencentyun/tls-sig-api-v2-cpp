@@ -57,7 +57,7 @@ src/tls_sig_api_v2.h
 
 库文件路径，分 Win32 和 x64，而且 Debug 和 Release 也通过目录予以区分
 ```
-tls-sig-api_xx/xxxx/tlsignature.lib
+tls-sig-api_xx/xxxx/tlssigapi_v2.lib
 tls-sig-api_xx/xxxx/zlibstatic.lib
 tls-sig-api_xx/xxxx/mbedcrypto.lib
 ```
@@ -77,12 +77,12 @@ tls-sig-api_xx/xxxx/mbedcrypto.lib
 std::string key = "5bd2850fff3ecb11d7c805251c51ee463a25727bddc2385f3fa8bfee1bb93b5e";
 
 std::string sig;
-std::sgring errMsg;
-int ret = gen_sig(140000000, "xiaojun", key, 180*86400, sig, errMsg);
+std::sgring errmsg;
+int ret = gen_sig(140000000, "xiaojun", key, 180*86400, sig, errmsg);
 if (0 != ret) {
-	std::cout << "gen_sig_v2 failed " << ret << " " << errMsg << std::endl;
+	std::cout << "gen_sig failed " << ret << " " << errmsg << std::endl;
 } else {
-	std::cout << "gen_sig_v2 " << sig << std::endl;
+	std::cout << "gen_sig " << sig << std::endl;
 }
 
 ```

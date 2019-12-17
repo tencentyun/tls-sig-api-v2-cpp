@@ -171,7 +171,58 @@ static int json2sig(const rapidjson::Document &json, std::string &sig, std::stri
     }
     return 0;
 }
+TLS_API std::string  getUserBuf(const std::string & account, uint32_t dwSdkappid,uint32_t dwAuthID,
+                    uint32_t dwExpTime,uint32_t dwPrivilegeMap,uint32_t dwAccountType)
+{
+    int length = 1+2+account.length()+20;
+    int offset = 0;
+    char userBuf[length];
+    memset(userBuf,0,sizeof(userBuf));
+    
+    userBuf[offset++]= 0;
 
+    userBuf[offset++] = ((account.length() & 0xFF00) >> 8);
+    userBuf[offset++] = (account.length() & 0x00FF);
+        
+    for(;offset < account.length() + 3; ++offset)
+    {
+        userBuf[offset] = account[offset-3];
+    }
+
+    //dwSdkAppid
+    userBuf[offset++] = ((dwSdkappid & 0xFF000000) >> 24);
+    userBuf[offset++] = ((dwSdkappid & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((dwSdkappid & 0x0000FF00) >> 8);
+    userBuf[offset++] = (dwSdkappid & 0x000000FF);
+    
+    //dwAuthId
+    userBuf[offset++] = ((dwAuthID & 0xFF000000) >> 24);
+    userBuf[offset++] = ((dwAuthID & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((dwAuthID & 0x0000FF00) >> 8);
+    userBuf[offset++] = (dwAuthID & 0x000000FF);
+        
+    //dwExpTime 不确定是直接填还是当前s数加上超时时间
+    //time_t now = time(0);
+    //uint32_t expiredTime = now + dwExpTime;
+    userBuf[offset++] = ((dwExpTime & 0xFF000000) >> 24);
+    userBuf[offset++] = ((dwExpTime & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((dwExpTime & 0x0000FF00) >> 8);
+    userBuf[offset++] = (dwExpTime & 0x000000FF);
+
+    //dwPrivilegeMap     
+    userBuf[offset++] = ((dwPrivilegeMap & 0xFF000000) >> 24);
+    userBuf[offset++] = ((dwPrivilegeMap & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((dwPrivilegeMap & 0x0000FF00) >> 8);
+    userBuf[offset++] = (dwPrivilegeMap & 0x000000FF);
+        
+    //dwAccountType
+    userBuf[offset++] = ((dwAccountType & 0xFF000000) >> 24);
+    userBuf[offset++] = ((dwAccountType & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((dwAccountType & 0x0000FF00) >> 8);
+    userBuf[offset++] = (dwAccountType & 0x000000FF);
+    return std::string(userBuf,length);
+
+}
 // ����ǩ��
 TLS_API int gen_sig(uint32_t sdkappid, const std::string& identifier,
         const std::string& key, int expire,

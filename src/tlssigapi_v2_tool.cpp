@@ -117,12 +117,12 @@ int main(int argc, char * argv[])
         std::string sdkappid_str = argv[4];
         std::string identifier = argv[5];
         ret = gen_sig(key, sig_file, strtol(sdkappid_str.c_str(), NULL, 10), identifier);
-    } else if (0 == strcmp(cmd, "genuser") && 7 == argc) {
+    } else if (0 == strcmp(cmd, "genuser") && 6 == argc) {
         std::string key = argv[2];
         std::string sig_file = argv[3];
         std::string sdkappid_str = argv[4];
         std::string identifier = argv[5];
-        std::string userbuf = argv[6];
+        std::string userbuf = getUserBuf(identifier,strtol(sdkappid_str.c_str(), NULL, 10),10000,180*86400,255,0);
         ret = gen_sig_with_userbuf(key, sig_file,
                 strtol(sdkappid_str.c_str(), NULL, 10), identifier, userbuf);
     } else {

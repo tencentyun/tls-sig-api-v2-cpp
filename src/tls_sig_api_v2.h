@@ -32,7 +32,23 @@ enum {
     CHECK_ERR_MAX,
 };
 
-
+/**
+ * @brief gen userbuf
+ * @param account userid
+ * @param dwSdkappid sdkappid
+ * @param dwAuthID  roomNum
+ * @param dwExpTime time
+ * @param dwPrivilegeMap 鐢ㄦ埛鏉冮檺
+ * @param dwAccountType 鐢ㄦ埛绫诲瀷
+ * @return string userbuf
+ */
+TLS_API std::string  getUserBuf(
+	const std::string & account,
+	uint32_t dwSdkappid,
+	uint32_t dwAuthID,
+        uint32_t dwExpTime,
+	uint32_t dwPrivilegeMap,
+	uint32_t dwAccountType);
 /**
  * @brief 生成签名函数
  * @param sdkappid 应用ID

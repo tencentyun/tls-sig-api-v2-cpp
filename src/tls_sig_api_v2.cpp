@@ -201,9 +201,8 @@ TLS_API std::string  getUserBuf(const std::string & account, uint32_t dwSdkappid
     userBuf[offset++] = ((dwAuthID & 0x0000FF00) >> 8);
     userBuf[offset++] = (dwAuthID & 0x000000FF);
         
-    //dwExpTime 不确定是直接填还是当前s数加上超时时间
-    //time_t now = time(0);
-    //uint32_t expiredTime = now + dwExpTime;
+    //dwExpTime 
+    //uint32_t dwExpTime = now + 300;
     userBuf[offset++] = ((dwExpTime & 0xFF000000) >> 24);
     userBuf[offset++] = ((dwExpTime & 0x00FF0000) >> 16);
     userBuf[offset++] = ((dwExpTime & 0x0000FF00) >> 8);

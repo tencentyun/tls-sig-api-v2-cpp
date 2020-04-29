@@ -42,7 +42,7 @@ enum {
  * @param dwAccountType 用户类型,默认为0
  * @return byte[] userbuf
  */
-TLS_API std::string  getUserBuf(
+TLS_API std::string  gen_userbuf(
 	const std::string & account,
 	uint32_t dwSdkappid,
 	uint32_t dwAuthID,
@@ -75,8 +75,9 @@ TLS_API int gen_sig(
  * @param sdkappid 应用ID
  * @param identifier 用户账号，utf-8 编码
  * @param key 密钥
+ * @param roomnum 房间号
  * @param expire 有效期，单位秒
- * @param userbuf 用户数据
+ * @param privilege 用户权限，255表示所有权限
  * @param sig 返回的 sig
  * @param errmsg 错误信息
  *
@@ -86,8 +87,9 @@ TLS_API int gen_sig_with_userbuf(
         uint32_t sdkappid,
         const std::string& identifier,
         const std::string& key,
+        int roomnum,
         int expire,
-        const std::string& userbuf,
+        int privilege,
         std::string& sig,
         std::string& errmsg);
 

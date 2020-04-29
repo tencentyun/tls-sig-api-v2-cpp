@@ -44,7 +44,7 @@ static std::string hmacsha256(uint32_t sdkappid,
         const std::string& identifier, uint64_t init_time, uint64_t expire,
         const std::string& key, const std::string& userbuf);
 
-//È¥µôÄ³Ğ© base64 ÖĞÉú³ÉµÄ \r\n space
+//å»æ‰æŸäº› base64 ä¸­ç”Ÿæˆçš„ \r\n space
 static std::string base64_strip(const void* data, size_t data_len)
 {
     const char* d = static_cast<const char*>(data);
@@ -171,7 +171,7 @@ static int json2sig(const rapidjson::Document &json, std::string &sig, std::stri
     }
     return 0;
 }
-TLS_API std::string  getUserBuf(const std::string & account, uint32_t dwSdkappid,uint32_t dwAuthID,
+TLS_API std::string  gen_userbuf(const std::string & account, uint32_t dwSdkappid,uint32_t dwAuthID,
                     uint32_t dwExpTime,uint32_t dwPrivilegeMap,uint32_t dwAccountType)
 {
     int length = 1+2+account.length()+20;
@@ -200,13 +200,13 @@ TLS_API std::string  getUserBuf(const std::string & account, uint32_t dwSdkappid
     userBuf[offset++] = ((dwAuthID & 0x00FF0000) >> 16);
     userBuf[offset++] = ((dwAuthID & 0x0000FF00) >> 8);
     userBuf[offset++] = (dwAuthID & 0x000000FF);
-        
-    //dwExpTime 
-    //uint32_t dwExpTime = now + 300;
-    userBuf[offset++] = ((dwExpTime & 0xFF000000) >> 24);
-    userBuf[offset++] = ((dwExpTime & 0x00FF0000) >> 16);
-    userBuf[offset++] = ((dwExpTime & 0x0000FF00) >> 8);
-    userBuf[offset++] = (dwExpTime & 0x000000FF);
+         
+    //uint32_t expire = now + dwExpTime;
+    uint32_t expire = time(NULL) + dwExpTime;
+    userBuf[offset++] = ((expire & 0xFF000000) >> 24);
+    userBuf[offset++] = ((expire & 0x00FF0000) >> 16);
+    userBuf[offset++] = ((expire & 0x0000FF00) >> 8);
+    userBuf[offset++] = (expire & 0x000000FF);
 
     //dwPrivilegeMap     
     userBuf[offset++] = ((dwPrivilegeMap & 0xFF000000) >> 24);
@@ -222,7 +222,7 @@ TLS_API std::string  getUserBuf(const std::string & account, uint32_t dwSdkappid
     return std::string(userBuf,length);
 
 }
-// Éú³ÉÇ©Ãû
+// ç”Ÿæˆç­¾å
 TLS_API int gen_sig(uint32_t sdkappid, const std::string& identifier,
         const std::string& key, int expire,
         std::string& sig, std::string& errmsg)
@@ -240,17 +240,19 @@ TLS_API int gen_sig(uint32_t sdkappid, const std::string& identifier,
     return json2sig(sig_doc, sig, errmsg);
 }
 
-// Éú³É´ø userbuf µÄÇ©Ãû
+// ç”Ÿæˆå¸¦ userbuf çš„ç­¾å
 TLS_API int gen_sig_with_userbuf(
         uint32_t sdkappid,
         const std::string& identifier,
         const std::string& key,
+        int roomnum,
         int expire,
-        const std::string& userbuf,
+        int privilege,
         std::string& sig,
         std::string& errmsg)
 {
     uint64_t currTime = time(NULL);
+    std::string userbuf = getUserBuf(identifier,sdkappid,roomnum,expire,privilege,0);
     std::string base64UserBuf;
     base64_encode(userbuf.data(), userbuf.length(), base64UserBuf);
     std::string base64RawSig = hmacsha256(
@@ -309,7 +311,7 @@ static std::string __hmacsha256(uint32_t sdkappid,
 }
 
 
-// Ê¹ÓÃ hmac sha256 Éú³É sig
+// ä½¿ç”¨ hmac sha256 ç”Ÿæˆ sig
 static std::string hmacsha256(uint32_t sdkappid,
         const std::string& identifier, uint64_t init_time,
         uint64_t expire, const std::string& key)
@@ -319,7 +321,7 @@ static std::string hmacsha256(uint32_t sdkappid,
 }
 
 
-// Ê¹ÓÃ hmac sha256 Éú³É´ø userbuf µÄ sig
+// ä½¿ç”¨ hmac sha256 ç”Ÿæˆå¸¦ userbuf çš„ sig
 static std::string hmacsha256(uint32_t sdkappid,
         const std::string& identifier, uint64_t init_time,
         uint64_t expire, const std::string& key,

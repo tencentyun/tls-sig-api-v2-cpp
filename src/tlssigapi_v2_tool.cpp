@@ -60,12 +60,12 @@ static int gen_sig(const std::string& key, const std::string& sig_file,
 }
 
 static int gen_sig_with_userbuf(const std::string& key, const std::string& sig_file,
-		uint32_t sdkappid, const std::string& identifier, const std::string& userbuf)
+		uint32_t sdkappid, const std::string& identifier)
 {
     std::string sig;
     std::string err_msg;
-	int ret = gen_sig_with_userbuf(sdkappid, identifier, key,
-            180*86400, userbuf, sig, err_msg);
+    int ret = gen_sig_with_userbuf(sdkappid, identifier, key,
+            1000,180*86400, 255, sig, err_msg);
 	if (0 != ret) {
         std::cout << "error msg: " << err_msg << " return " << ret << std::endl;
 		return -3;
@@ -108,7 +108,6 @@ int main(int argc, char * argv[])
     std::string sig_file;
     std::string sdkappid_str;
     std::string identifier;
-    std::string userbuf;
 
     int ret = 0;
     if (0 == strcmp(cmd, "gen") && 6 == argc) {
@@ -122,9 +121,8 @@ int main(int argc, char * argv[])
         std::string sig_file = argv[3];
         std::string sdkappid_str = argv[4];
         std::string identifier = argv[5];
-        std::string userbuf = getUserBuf(identifier,strtol(sdkappid_str.c_str(), NULL, 10),10000,180*86400,255,0);
         ret = gen_sig_with_userbuf(key, sig_file,
-                strtol(sdkappid_str.c_str(), NULL, 10), identifier, userbuf);
+                strtol(sdkappid_str.c_str(), NULL, 10), identifier);
     } else {
         usage(argv[0]);
         return -1;

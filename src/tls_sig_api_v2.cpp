@@ -223,50 +223,50 @@ TLS_API std::string  gen_userbuf(const std::string & account, uint32_t dwSdkappi
 
 }
 // 生成签名
-TLS_API int gen_sig(uint32_t sdkappid, const std::string& identifier,
+TLS_API int genUserSig(uint32_t sdkappid, const std::string& userid,
         const std::string& key, int expire,
-        std::string& sig, std::string& errmsg)
+        std::string& usersig, std::string& errmsg)
 {
     uint64_t curr_time = time(NULL);
-    std::string base64_raw_sig = hmacsha256(sdkappid, identifier, curr_time, expire, key);
+    std::string base64_raw_sig = hmacsha256(sdkappid, userid, curr_time, expire, key);
     rapidjson::Document sig_doc;
     sig_doc.SetObject();
     sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.identifier", identifier, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.identifier", userid, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.time", curr_time, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.sig", base64_raw_sig, sig_doc.GetAllocator());
-    return json2sig(sig_doc, sig, errmsg);
+    return json2sig(sig_doc, usersig, errmsg);
 }
 
 // 生成带 userbuf 的签名
-TLS_API int gen_sig_with_userbuf(
+TLS_API int genPrivateMapKey(
         uint32_t sdkappid,
-        const std::string& identifier,
+        const std::string& userid,
         const std::string& key,
-        int roomnum,
+        uint32_t roomid,
         int expire,
-        int privilege,
-        std::string& sig,
+        int privilegeMap,
+        std::string& usersig,
         std::string& errmsg)
 {
     uint64_t currTime = time(NULL);
-    std::string userbuf = getUserBuf(identifier,sdkappid,roomnum,expire,privilege,0);
+    std::string userbuf = gen_userbuf(userid,sdkappid,roomid,expire,privilegeMap,0);
     std::string base64UserBuf;
     base64_encode(userbuf.data(), userbuf.length(), base64UserBuf);
     std::string base64RawSig = hmacsha256(
-            sdkappid, identifier, currTime, expire, key, base64UserBuf);
+            sdkappid, userid, currTime, expire, key, base64UserBuf);
     rapidjson::Document sig_doc;
     sig_doc.SetObject();
     sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.identifier", identifier, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.identifier", userid, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.time", currTime, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.userbuf", base64UserBuf, sig_doc.GetAllocator());
     sig_doc.AddMember("TLS.sig", base64RawSig, sig_doc.GetAllocator());
-    return json2sig(sig_doc, sig, errmsg);
+    return json2sig(sig_doc, usersig, errmsg);
 }
 
 

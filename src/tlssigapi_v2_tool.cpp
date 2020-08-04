@@ -23,12 +23,12 @@ static void usage(const std::string& prog)
 	std::cout << "\tgenuser sig: " << prog << " genuser 5bd2850fff3ecb11d7c805251c51ee463a25727bddc2385f3fa8bfee1bb93b5e sig 1400000000 xiaojun abc" << std::endl;
 }
 
-static int gen_sig(const std::string& key, const std::string& sig_file,
-		uint32_t sdkappid, const std::string& identifier)
+static int genUserSig(const std::string& key, const std::string& sig_file,
+		uint32_t sdkappid, const std::string& userid)
 {
     std::string sig;
     std::string err_msg;
-	int ret = gen_sig(sdkappid, identifier, key, 180*86400, sig, err_msg);
+	int ret = genUserSig(sdkappid, userid, key, 180*86400, sig, err_msg);
 	if (0 != ret) {
         std::cout << "error msg: " << err_msg << " return " << ret << std::endl;
 		return -3;
@@ -59,13 +59,13 @@ static int gen_sig(const std::string& key, const std::string& sig_file,
 	return 0;
 }
 
-static int gen_sig_with_userbuf(const std::string& key, const std::string& sig_file,
-		uint32_t sdkappid, const std::string& identifier)
+static int genPrivateMapKey(const std::string& key, const std::string& sig_file,
+		uint32_t sdkappid, const std::string& userid)
 {
     std::string sig;
     std::string err_msg;
-    int ret = gen_sig_with_userbuf(sdkappid, identifier, key,
-            1000,180*86400, 255, sig, err_msg);
+    int ret = genPrivateMapKey(sdkappid, userid, key,
+            10000,180*86400, 255, sig, err_msg);
 	if (0 != ret) {
         std::cout << "error msg: " << err_msg << " return " << ret << std::endl;
 		return -3;
@@ -107,22 +107,22 @@ int main(int argc, char * argv[])
     const char * cmd = argv[1];
     std::string sig_file;
     std::string sdkappid_str;
-    std::string identifier;
+    std::string userid;
 
     int ret = 0;
     if (0 == strcmp(cmd, "gen") && 6 == argc) {
         std::string key = argv[2];
         std::string sig_file = argv[3];
         std::string sdkappid_str = argv[4];
-        std::string identifier = argv[5];
-        ret = gen_sig(key, sig_file, strtol(sdkappid_str.c_str(), NULL, 10), identifier);
+        std::string userid = argv[5];
+        ret = genUserSig(key, sig_file, strtol(sdkappid_str.c_str(), NULL, 10), userid);
     } else if (0 == strcmp(cmd, "genuser") && 6 == argc) {
         std::string key = argv[2];
         std::string sig_file = argv[3];
         std::string sdkappid_str = argv[4];
-        std::string identifier = argv[5];
-        ret = gen_sig_with_userbuf(key, sig_file,
-                strtol(sdkappid_str.c_str(), NULL, 10), identifier);
+        std::string userid = argv[5];
+        ret = genPrivateMapKey(key, sig_file,
+                strtol(sdkappid_str.c_str(), NULL, 10), userid);
     } else {
         usage(argv[0]);
         return -1;

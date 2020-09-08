@@ -247,50 +247,39 @@ static std::string hmacsha256(uint32_t sdkappid, const std::string &identifier, 
 TLS_API int genUserSig(uint32_t sdkappid, const std::string &userid, const std::string &key,
                        int expire, std::string &usersig, std::string &errmsg)
 {
-    uint64_t curr_time = time(NULL);
-    std::string base64_raw_sig = hmacsha256(sdkappid, userid, curr_time, expire, key);
-    rapidjson::Document sig_doc;
-    sig_doc.SetObject();
-    sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.identifier", userid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.time", curr_time, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.sig", base64_raw_sig, sig_doc.GetAllocator());
-    return json2sig(sig_doc, usersig, errmsg);
+    return genSig(sdkappid,userid,key,"",expire,usersig,errmsg);
 }
 
 // 生成带 userbuf 的签名
 TLS_API int genPrivateMapKey(uint32_t sdkappid, const std::string &userid, const std::string &key, uint32_t roomid,
                              int expire, int privilegeMap, std::string &usersig, std::string &errmsg)
 {
-    uint64_t currTime = time(NULL);
-    std::string userbuf = gen_userbuf(userid, sdkappid, roomid, expire, privilegeMap, 0);
-    std::string base64UserBuf;
-    base64_encode(userbuf.data(), userbuf.length(), base64UserBuf);
-    std::string base64RawSig = hmacsha256(
-        sdkappid, userid, currTime, expire, key, base64UserBuf);
-    rapidjson::Document sig_doc;
-    sig_doc.SetObject();
-    sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.identifier", userid, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.time", currTime, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.userbuf", base64UserBuf, sig_doc.GetAllocator());
-    sig_doc.AddMember("TLS.sig", base64RawSig, sig_doc.GetAllocator());
-    return json2sig(sig_doc, usersig, errmsg);
+    std::string userbuf = gen_userbuf(userid, sdkappid, roomid, expire, privilegeMap, 0,"");
+    return genSig(sdkappid,userid,key,userbuf,expire,usersig,errmsg);
+}
+// 生成带 userbuf 的签名,字符串房间号
+TLS_API int genPrivateMapKeyWithStringRoomID(uint32_t sdkappid, const std::string &userid, const std::string &key, const std::string &roomstr,
+                             int expire, int privilegeMap, std::string &usersig, std::string &errmsg)
+{
+    std::string userbuf = gen_userbuf(userid, sdkappid, 0, expire, privilegeMap, 0,roomstr);
+    return genSig(sdkappid,userid,key,userbuf,expire,usersig,errmsg);
 }
 
 TLS_API std::string gen_userbuf(const std::string &account, uint32_t dwSdkappid, uint32_t dwAuthID,
-                                uint32_t dwExpTime, uint32_t dwPrivilegeMap, uint32_t dwAccountType)
+                                uint32_t dwExpTime, uint32_t dwPrivilegeMap, uint32_t dwAccountType, const std::string &roomStr)
 {
     int length = 1 + 2 + account.length() + 20;
     int offset = 0;
     char userBuf[length];
     memset(userBuf, 0, sizeof(userBuf));
 
-    userBuf[offset++] = 0;
+    if (roomStr.length() > 0)
+    {
+        userBuf[offset++] = 1;
+        length += 2 + roomStr.length();
+    }
+    else
+        userBuf[offset++] = 0;
 
     userBuf[offset++] = ((account.length() & 0xFF00) >> 8);
     userBuf[offset++] = (account.length() & 0x00FF);
@@ -330,5 +319,45 @@ TLS_API std::string gen_userbuf(const std::string &account, uint32_t dwSdkappid,
     userBuf[offset++] = ((dwAccountType & 0x00FF0000) >> 16);
     userBuf[offset++] = ((dwAccountType & 0x0000FF00) >> 8);
     userBuf[offset++] = (dwAccountType & 0x000000FF);
+
+    if (roomStr.length() > 0)
+    {
+        userBuf[offset++] = ((roomStr.length() & 0xFF00) >> 8);
+        userBuf[offset++] = (roomStr.length() & 0x00FF);
+
+        for (; offset < length; ++offset)
+        {
+            userBuf[offset] = account[offset - (length - roomStr.length())];
+        }
+    }
     return std::string(userBuf, length);
+}
+TLS_API int genSig(uint32_t sdkappid, const std::string &userid, const std::string &key, const std::string &userbuf,
+                             int expire, std::string &usersig, std::string &errmsg)
+{
+    uint64_t currTime = time(NULL);
+    std::string base64UserBuf = "";
+    std::string base64RawSig = "";
+    if(userbuf.length() >0)
+    {
+        base64_encode(userbuf.data(), userbuf.length(), base64UserBuf);
+        base64RawSig = hmacsha256(
+            sdkappid, userid, currTime, expire, key, base64UserBuf);
+    }
+    else
+    {
+        base64RawSig = hmacsha256(sdkappid, userid, currTime, expire, key);
+    }
+    
+    rapidjson::Document sig_doc;
+    sig_doc.SetObject();
+    sig_doc.AddMember("TLS.ver", "2.0", sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sdkappid", sdkappid, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.identifier", userid, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.time", currTime, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.expire", expire, sig_doc.GetAllocator());
+    if(base64UserBuf.length() > 0)
+        sig_doc.AddMember("TLS.userbuf", base64UserBuf, sig_doc.GetAllocator());
+    sig_doc.AddMember("TLS.sig", base64RawSig, sig_doc.GetAllocator());
+    return json2sig(sig_doc, usersig, errmsg);
 }

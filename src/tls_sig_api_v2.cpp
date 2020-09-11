@@ -270,14 +270,13 @@ TLS_API std::string gen_userbuf(const std::string &account, uint32_t dwSdkappid,
 {
     int length = 1 + 2 + account.length() + 20;
     int offset = 0;
+     if (roomStr.length() > 0)
+        length += 2 + roomStr.length();
     char userBuf[length];
     memset(userBuf, 0, sizeof(userBuf));
 
     if (roomStr.length() > 0)
-    {
         userBuf[offset++] = 1;
-        length += 2 + roomStr.length();
-    }
     else
         userBuf[offset++] = 0;
 

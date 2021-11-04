@@ -326,7 +326,7 @@ TLS_API std::string gen_userbuf(const std::string &account, uint32_t dwSdkappid,
 
         for (; offset < length; ++offset)
         {
-            userBuf[offset] = account[offset - (length - roomStr.length())];
+            userBuf[offset] = roomStr[offset - (length - roomStr.length())];
         }
     }
     return std::string(userBuf, length);

@@ -78,11 +78,11 @@ std::string key = "5bd2850fff3ecb11d7c805251c51ee463a25727bddc2385f3fa8bfee1bb93
 
 std::string sig;
 std::sgring errmsg;
-int ret = gen_sig(140000000, "xiaojun", key, 180*86400, sig, errmsg);
+int ret = genUserSig(140000000, "xiaojun", key, 180*86400, sig, errmsg);
 if (0 != ret) {
-	std::cout << "gen_sig failed " << ret << " " << errmsg << std::endl;
+	std::cout << "genUserSig failed " << ret << " " << errmsg << std::endl;
 } else {
-	std::cout << "gen_sig " << sig << std::endl;
+	std::cout << "genUserSig " << sig << std::endl;
 }
 
 ```

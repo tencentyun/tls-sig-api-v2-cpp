@@ -43,7 +43,8 @@ static std::string hmacsha256(uint32_t sdkappid, const std::string &identifier, 
 static std::string hmacsha256(uint32_t sdkappid, const std::string &identifier, uint64_t init_time, uint64_t expire,
                               const std::string &key, const std::string &userbuf);
 
-//去掉某些 base64 中生成的 \r\n space
+// 去掉某些 base64 中生成的 \r\n space
+// Remove some generated \r\n spaces in base64
 static std::string base64_strip(const void *data, size_t data_len) {
   const char *d = static_cast<const char *>(data);
   std::string s;
@@ -195,29 +196,34 @@ static std::string __hmacsha256(uint32_t sdkappid, const std::string &identifier
 }
 
 // 使用 hmac sha256 生成 sig
+// Generate sig using hmac sha256
 static std::string hmacsha256(uint32_t sdkappid, const std::string &identifier, uint64_t init_time, uint64_t expire,
                               const std::string &key) {
   return __hmacsha256(sdkappid, identifier, init_time, expire, key, "", false);
 }
 
 // 使用 hmac sha256 生成带 userbuf 的 sig
+// Generate sig with userbuf using hmac sha256
 static std::string hmacsha256(uint32_t sdkappid, const std::string &identifier, uint64_t init_time, uint64_t expire,
                               const std::string &key, const std::string &base64_userbuf) {
   return __hmacsha256(sdkappid, identifier, init_time, expire, key, base64_userbuf, true);
 }
 // 生成签名
+// Generate signature
 TLS_API int genUserSig(uint32_t sdkappid, const std::string &userid, const std::string &key, int expire,
                        std::string &usersig, std::string &errmsg) {
   return genSig(sdkappid, userid, key, "", expire, usersig, errmsg);
 }
 
-// 生成带 userbuf 的签名
+// 生成带 userbuf 的签名 
+// Signature with userbuf generated
 TLS_API int genPrivateMapKey(uint32_t sdkappid, const std::string &userid, const std::string &key, uint32_t roomid,
                              int expire, int privilegeMap, std::string &usersig, std::string &errmsg) {
   std::string userbuf = gen_userbuf(userid, sdkappid, roomid, expire, privilegeMap, 0, "");
   return genSig(sdkappid, userid, key, userbuf, expire, usersig, errmsg);
 }
 // 生成带 userbuf 的签名,字符串房间号
+// Signature with userbuf generated, String-type room ID
 TLS_API int genPrivateMapKeyWithStringRoomID(uint32_t sdkappid, const std::string &userid, const std::string &key,
                                              const std::string &roomstr, int expire, int privilegeMap,
                                              std::string &usersig, std::string &errmsg) {

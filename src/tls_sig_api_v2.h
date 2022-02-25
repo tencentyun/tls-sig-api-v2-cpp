@@ -50,7 +50,7 @@ enum {
  * Parameter description:
  * @param sdkappid - Application ID
  * @param userid - User ID. The value can be up to 32 bytes in length and contain letters (a-z and A-Z), digits (0-9), underscores (_), and hyphens (-).
- * @param key - 计算 usersig 用的加密密钥,控制台可获取。
+ * @param key - The encryption key used to calculate usersig can be obtained from the console.
  * @param expire - UserSig expiration time, in seconds. For example, 86400 indicates that the generated UserSig will expire one day after being generated.
  * @param usersig - Generated signature.
  * @param errmsg - error message.
@@ -102,7 +102,7 @@ TLS_API int genUserSig(uint32_t sdkappid, const std::string &userid, const std::
  * Parameter description:
  * @param sdkappid - Application ID
  * @param userid - User ID. The value can be up to 32 bytes in length and contain letters (a-z and A-Z), digits (0-9), underscores (_), and hyphens (-).
- * @param key - 计算 usersig 用的加密密钥,控制台可获取。
+ * @param key - The encryption key used to calculate usersig can be obtained from the console.
  * @param roomid - ID of the room to which the specified UserID can enter.
  * @param expire - PrivateMapKey expiration time, in seconds. For example, 86400 indicates that the generated PrivateMapKey will expire one day after being generated.
  * @param privilegeMap - Permission bits. Eight bits in the same byte are used as the permission switches of eight specific features:
@@ -166,7 +166,7 @@ TLS_API int genPrivateMapKey(uint32_t sdkappid, const std::string &userid, const
  * Parameter description:
  * @param sdkappid - Application ID
  * @param userid - User ID. The value can be up to 32 bytes in length and contain letters (a-z and A-Z), digits (0-9), underscores (_), and hyphens (-).
- * @param key - 计算 usersig 用的加密密钥,控制台可获取。
+ * @param key - The encryption key used to calculate usersig can be obtained from the console.
  * @param roomstr - ID of the room to which the specified UserID can enter.
  * @param expire - PrivateMapKey expiration time, in seconds. For example, 86400 indicates that the generated PrivateMapKey will expire one day after being generated.
  * @param privilegeMap - Permission bits. Eight bits in the same byte are used as the permission switches of eight specific features:
